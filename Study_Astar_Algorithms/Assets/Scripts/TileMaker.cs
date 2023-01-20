@@ -32,13 +32,23 @@ public class TileMaker : MonoBehaviour
             {
                 _tilePosition = new Vector2(x, y);
 
+                if (x == 10 && y == 10)
+                {
+                    GameObject playerTile = Instantiate(_tilePrefabs[MOVE_TILE], _tilePosition, Quaternion.identity);
+
+                    playerTile.transform.SetParent(_tileGroup.transform, playerTile.transform);
+
+                    x += 1;
+                    continue;
+                }
+
                 int tileDestiny = Random.Range(0, 10);
 
-                var tile = tileDestiny <= 1 ? Instantiate(_tilePrefabs[BLOCK_TILE], _tilePosition, Quaternion.identity) : Instantiate(_tilePrefabs[MOVE_TILE], _tilePosition, Quaternion.identity);
+                GameObject tile = tileDestiny <= 1 ? Instantiate(_tilePrefabs[BLOCK_TILE], _tilePosition, Quaternion.identity) : Instantiate(_tilePrefabs[MOVE_TILE], _tilePosition, Quaternion.identity);
 
-                
-                    tile.transform.SetParent(_tileGroup.transform, tile.transform);
-                
+
+                tile.transform.SetParent(_tileGroup.transform, tile.transform);
+
 
                 x += 1;
             }

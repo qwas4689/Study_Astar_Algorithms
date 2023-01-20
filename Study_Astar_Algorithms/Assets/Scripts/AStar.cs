@@ -20,6 +20,9 @@ public class AStar : MonoBehaviour
     [SerializeField] private Json json;
 
     private List<GameObject> _openTiles = new List<GameObject>();
+    private List<GameObject> _closeTiles = new List<GameObject>();
+
+    private List<int> _ghf = new List<int>();
 
     private bool[] _tileGroup;
     private int _totalTileCounts;
@@ -28,11 +31,32 @@ public class AStar : MonoBehaviour
 
     private int[] LOOKUP_TABLE = { 20, 21, 1, -19, -20, -21, -1, +19 };
 
+    private const int UP = 0;
+    private const int RIGHT_UP_ANGLE = 1;
+    private const int RIGHT = 2;
+    private const int RIGHT_DOWN_ANGLE = 3;
+    private const int DOWN = 4;
+    private const int LEFT_DOWN_ANGLE = 5;
+    private const int LEFT = 6;
+    private const int LEFT_UP_ANGLE = 7;
+
+    private int _playerPosX;
+    private int _playerPosY;
+
+    private IEnumerator _maybeAStar;
+
+    private Dictionary<int, List<int>> _astarRecorder = new Dictionary<int, List<int>>();
+
     private void Start()
     {
         _totalTileCounts = json.XTileCount * json.YTileCount;
 
         _tileGroup = new bool[_totalTileCounts];
+
+        _maybeAStar = MaybeAStar(_openTiles);
+
+        _playerPosX = Mathf.RoundToInt(GameManager.Instance.PlayerPos.x);
+        _playerPosY = Mathf.RoundToInt(GameManager.Instance.PlayerPos.y);
     }
 
     private void Update()
@@ -43,8 +67,54 @@ public class AStar : MonoBehaviour
             {
                 _tileGroup[i] = transform.GetChild(i).name == MOVE_TILE ? true : false;
 
-                ++_setMoveTileCount; 
+                ++_setMoveTileCount;
             }
+
+            _closeTiles.Add(transform.GetChild(PlayerTileIndex()).gameObject);
+
+            StartCoroutine(_maybeAStar);
         }
     }
+
+    /// <summary>
+    /// 플레이어 좌표 구하기
+    /// </summary>
+    /// <returns></returns>
+    private int PlayerTileIndex()
+    {
+        return _playerPosX + _playerPosY * json.YTileCount;
+    }
+
+    /// <summary>
+    /// 에이스타 알고리즘 코루틴
+    /// </summary>
+    /// <param name="openTile"></param>
+    /// <returns></returns>
+    private IEnumerator MaybeAStar(List<GameObject> openTile)
+    {
+        // 처음 플레이어가 있는 타일을 받아왔잖아 몇번 인덱스인지 알잖아 그걸 이제 룩업테이블을 돌려서 참인 것들의 인덱스만 오픈타일로 넣어줘
+
+        for (int LookUpTableIndex = 0; LookUpTableIndex < LOOKUP_TABLE.Length; ++LookUpTableIndex)
+        {
+            if (_tileGroup[PlayerTileIndex() + LOOKUP_TABLE[LookUpTableIndex]])
+            {
+                openTile.Add(transform.GetChild(PlayerTileIndex() + LOOKUP_TABLE[LookUpTableIndex]).gameObject);
+            }
+        }
+
+        yield return null;
+    }
+
+    private void ManhattanDistance(List<GameObject> tileList, int goalX, int goalY)
+    {
+        foreach (var a in tileList)
+        {
+            if (goalX < _playerPosX)
+            {
+                 = _playerPosX - goalX;
+            }
+
+        }
+    }
+
 }
