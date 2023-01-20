@@ -13,7 +13,7 @@ public class TileMaker : MonoBehaviour
 
     private Vector2 _tilePosition;
 
-    private void Awake()
+    private void Start()
     {
         MakeField();
     }
