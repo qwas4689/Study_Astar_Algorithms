@@ -100,10 +100,12 @@ public class AStar : MonoBehaviour
             if (_tileGroup[playerPositionIndex + LOOKUP_TABLE[LookUpTableIndex]] && !_isasd)
             {
                 openTile.Add(transform.GetChild(playerPositionIndex + LOOKUP_TABLE[LookUpTableIndex]).gameObject);
+                _tileGroup[playerPositionIndex + LOOKUP_TABLE[LookUpTableIndex]] = false;
             }
             else if (_tileGroup[playerPositionIndex + LOOKUP_TABLE[LookUpTableIndex]])
             {
                 openTile.Add(transform.GetChild(_index + LOOKUP_TABLE[LookUpTableIndex]).gameObject);
+                _tileGroup[_index + LOOKUP_TABLE[LookUpTableIndex]] = false;
             }
         }
         _isasd = true;
@@ -137,17 +139,16 @@ public class AStar : MonoBehaviour
 
                     tileList[i].GetComponent<TileGHF>().G = _gXValue + _gYValue;
                     tileList[i].GetComponent<TileGHF>().F = tileList[i].GetComponent<TileGHF>().H + tileList[i].GetComponent<TileGHF>().G;
-
-                    if (_minDistanse == 0)
-                    {
-                        _minDistanse = Mathf.RoundToInt(tileList[i].transform.position.x + tileList[i].transform.position.y * json.YTileCount);
-                        _index = Mathf.RoundToInt(tileList[i].transform.position.x + tileList[i].transform.position.y * json.YTileCount);
-                    }
-                    else
-                    {
-                        _minDistanse = _minDistanse < tileList[i].GetComponent<TileGHF>().F ? _minDistanse : tileList[i].GetComponent<TileGHF>().F;
-                        _index = _minDistanse < tileList[i].GetComponent<TileGHF>().F ? _index : Mathf.RoundToInt(tileList[i].transform.position.x + tileList[i].transform.position.y * json.YTileCount);
-                    }  
+                }
+                if (_minDistanse == 0)
+                {
+                    _minDistanse = Mathf.RoundToInt(tileList[i].transform.position.x + tileList[i].transform.position.y * json.YTileCount);
+                    _index = Mathf.RoundToInt(tileList[i].transform.position.x + tileList[i].transform.position.y * json.YTileCount);
+                }
+                else
+                {
+                    _minDistanse = _minDistanse < tileList[i].GetComponent<TileGHF>().F ? _minDistanse : tileList[i].GetComponent<TileGHF>().F;
+                    _index = _minDistanse < tileList[i].GetComponent<TileGHF>().F ? _index : Mathf.RoundToInt(tileList[i].transform.position.x + tileList[i].transform.position.y * json.YTileCount);
                 }
             }
 

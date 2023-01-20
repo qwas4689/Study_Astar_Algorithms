@@ -25,7 +25,7 @@ public class Pointer : MonoBehaviour
             MousePositionY = Mathf.RoundToInt(_mousePosition.y);
 
             OnClickMouseButton.Invoke();
-            Debug.Log($"X : {MousePositionX}, Y : {MousePositionY}");
+            //Debug.Log($"X : {MousePositionX}, Y : {MousePositionY}");
         }
     }
 }
