@@ -18,6 +18,7 @@ public class AStar : MonoBehaviour
     // 내가 있는 인덱스 x + y*20
 
     [SerializeField] private Json json;
+    [SerializeField] private Pointer _pointer;
 
     private List<GameObject> _openTiles = new List<GameObject>();
     private List<GameObject> _closeTiles = new List<GameObject>();
@@ -31,21 +32,17 @@ public class AStar : MonoBehaviour
 
     private int[] LOOKUP_TABLE = { 20, 21, 1, -19, -20, -21, -1, +19 };
 
-    private const int UP = 0;
-    private const int RIGHT_UP_ANGLE = 1;
-    private const int RIGHT = 2;
-    private const int RIGHT_DOWN_ANGLE = 3;
-    private const int DOWN = 4;
-    private const int LEFT_DOWN_ANGLE = 5;
-    private const int LEFT = 6;
-    private const int LEFT_UP_ANGLE = 7;
-
     private int _playerPosX;
     private int _playerPosY;
 
-    private IEnumerator _maybeAStar;
+    private int _xValue;
+    private int _yValue;
 
-    private Dictionary<int, List<int>> _astarRecorder = new Dictionary<int, List<int>>();
+    private int _gXValue;
+    private int _gYValue;
+
+    private int _minDistanse;
+    private int _index;
 
     private void Start()
     {
@@ -53,10 +50,11 @@ public class AStar : MonoBehaviour
 
         _tileGroup = new bool[_totalTileCounts];
 
-        _maybeAStar = MaybeAStar(_openTiles);
-
         _playerPosX = Mathf.RoundToInt(GameManager.Instance.PlayerPos.x);
         _playerPosY = Mathf.RoundToInt(GameManager.Instance.PlayerPos.y);
+
+        _pointer.OnClickMouseButton.RemoveListener(() => ManhattanDistance(_openTiles, _pointer.MousePositionX, _pointer.MousePositionY));
+        _pointer.OnClickMouseButton.AddListener(() => ManhattanDistance(_openTiles, _pointer.MousePositionX, _pointer.MousePositionY));
     }
 
     private void Update()
@@ -72,7 +70,7 @@ public class AStar : MonoBehaviour
 
             _closeTiles.Add(transform.GetChild(PlayerTileIndex()).gameObject);
 
-            StartCoroutine(_maybeAStar);
+            MaybeAStar(_openTiles, PlayerTileIndex());
         }
     }
 
@@ -86,35 +84,69 @@ public class AStar : MonoBehaviour
     }
 
     /// <summary>
-    /// 에이스타 알고리즘 코루틴
+    /// 주변 탐색
     /// </summary>
     /// <param name="openTile"></param>
-    /// <returns></returns>
-    private IEnumerator MaybeAStar(List<GameObject> openTile)
+    private void MaybeAStar(List<GameObject> openTile, int playerPositionIndex)
     {
         // 처음 플레이어가 있는 타일을 받아왔잖아 몇번 인덱스인지 알잖아 그걸 이제 룩업테이블을 돌려서 참인 것들의 인덱스만 오픈타일로 넣어줘
-
         for (int LookUpTableIndex = 0; LookUpTableIndex < LOOKUP_TABLE.Length; ++LookUpTableIndex)
         {
-            if (_tileGroup[PlayerTileIndex() + LOOKUP_TABLE[LookUpTableIndex]])
+            if (_tileGroup[playerPositionIndex + LOOKUP_TABLE[LookUpTableIndex]])
             {
-                openTile.Add(transform.GetChild(PlayerTileIndex() + LOOKUP_TABLE[LookUpTableIndex]).gameObject);
+                openTile.Add(transform.GetChild(playerPositionIndex + LOOKUP_TABLE[LookUpTableIndex]).gameObject);
             }
         }
-
-        yield return null;
     }
 
     private void ManhattanDistance(List<GameObject> tileList, int goalX, int goalY)
     {
-        foreach (var a in tileList)
-        {
-            if (goalX < _playerPosX)
+        
+            for (int i = 0; i < tileList.Count; ++i)
             {
-                 = _playerPosX - goalX;
+                int x = Mathf.RoundToInt(tileList[i].transform.position.x);
+                int y = Mathf.RoundToInt(tileList[i].transform.position.y);
+
+                _xValue = goalX < x ? x - goalX : goalX - x;
+                _yValue = goalY < y ? y - goalY : goalY - y;
+
+                // 조건문 클릭한 타일이 달라질 때 로 해야할듯
+                if (tileList[i].GetComponent<TileGHF>().H != 0)
+                {
+                    continue;
+                }
+                else
+                {
+                    tileList[i].GetComponent<TileGHF>().H = _xValue + _yValue;
+
+                    _gXValue = _playerPosX < x ? x - _playerPosX : _playerPosX - x;
+                    _gYValue = _playerPosY < y ? y - _playerPosY : _playerPosY - y;
+
+                    tileList[i].GetComponent<TileGHF>().G = _gXValue + _gYValue;
+                    tileList[i].GetComponent<TileGHF>().F = tileList[i].GetComponent<TileGHF>().H + tileList[i].GetComponent<TileGHF>().G;
+
+                    if (_minDistanse == 0)
+                    {
+                        _minDistanse = Mathf.RoundToInt(tileList[i].transform.position.x + tileList[i].transform.position.y * json.YTileCount);
+                        _index = Mathf.RoundToInt(tileList[i].transform.position.x + tileList[i].transform.position.y * json.YTileCount);
+                    }
+                    else
+                    {
+                        _minDistanse = _minDistanse < tileList[i].GetComponent<TileGHF>().F ? _minDistanse : tileList[i].GetComponent<TileGHF>().F; 
+                        _index = _minDistanse < tileList[i].GetComponent<TileGHF>().F ? _index : Mathf.RoundToInt(tileList[i].transform.position.x + tileList[i].transform.position.y * json.YTileCount);
+                    }
+                    
+                }
             }
 
-        }
-    }
+            _closeTiles.Add(transform.GetChild(_index).gameObject);
 
+            _openTiles.Clear();
+
+            MaybeAStar(_openTiles, _index);
+
+
+            
+        
+    }
 }

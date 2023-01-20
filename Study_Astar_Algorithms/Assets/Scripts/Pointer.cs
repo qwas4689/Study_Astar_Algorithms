@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
 public class Pointer : MonoBehaviour
 {
@@ -10,6 +11,8 @@ public class Pointer : MonoBehaviour
 
     public int MousePositionX { get; private set; }
     public int MousePositionY { get; private set; }
+
+    public UnityEvent OnClickMouseButton = new UnityEvent();
 
     private void Update()
     {
@@ -21,8 +24,8 @@ public class Pointer : MonoBehaviour
             MousePositionX = Mathf.RoundToInt(_mousePosition.x);
             MousePositionY = Mathf.RoundToInt(_mousePosition.y);
 
+            OnClickMouseButton.Invoke();
             Debug.Log($"X : {MousePositionX}, Y : {MousePositionY}");
-
         }
     }
 }

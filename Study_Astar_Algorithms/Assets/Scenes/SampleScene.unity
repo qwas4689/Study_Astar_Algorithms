@@ -202,6 +202,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _camera: {fileID: 519420031}
+  OnClickMouseButton:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &404591021
 Transform:
   m_ObjectHideFlags: 0
@@ -391,6 +394,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   json: {fileID: 781449556}
+  _pointer: {fileID: 404591020}
 --- !u!114 &2045760543
 MonoBehaviour:
   m_ObjectHideFlags: 0
