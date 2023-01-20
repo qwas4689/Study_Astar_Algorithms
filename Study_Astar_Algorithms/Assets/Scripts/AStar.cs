@@ -23,8 +23,6 @@ public class AStar : MonoBehaviour
     private List<GameObject> _openTiles = new List<GameObject>();
     private List<GameObject> _closeTiles = new List<GameObject>();
 
-    private List<int> _ghf = new List<int>();
-
     private bool[] _tileGroup;
     private int _totalTileCounts;
     private int _setMoveTileCount;
@@ -43,6 +41,8 @@ public class AStar : MonoBehaviour
 
     private int _minDistanse;
     private int _index;
+
+    private bool _isasd;
 
     private void Start()
     {
@@ -64,6 +64,11 @@ public class AStar : MonoBehaviour
             for (int i = 0; i < _totalTileCounts; ++i)
             {
                 _tileGroup[i] = transform.GetChild(i).name == MOVE_TILE ? true : false;
+
+                if (i == PlayerTileIndex())
+                {
+                    _tileGroup[i] = false;
+                }
 
                 ++_setMoveTileCount;
             }
@@ -92,16 +97,24 @@ public class AStar : MonoBehaviour
         // 처음 플레이어가 있는 타일을 받아왔잖아 몇번 인덱스인지 알잖아 그걸 이제 룩업테이블을 돌려서 참인 것들의 인덱스만 오픈타일로 넣어줘
         for (int LookUpTableIndex = 0; LookUpTableIndex < LOOKUP_TABLE.Length; ++LookUpTableIndex)
         {
-            if (_tileGroup[playerPositionIndex + LOOKUP_TABLE[LookUpTableIndex]])
+            if (_tileGroup[playerPositionIndex + LOOKUP_TABLE[LookUpTableIndex]] && !_isasd)
             {
                 openTile.Add(transform.GetChild(playerPositionIndex + LOOKUP_TABLE[LookUpTableIndex]).gameObject);
             }
+            else if (_tileGroup[playerPositionIndex + LOOKUP_TABLE[LookUpTableIndex]])
+            {
+                openTile.Add(transform.GetChild(_index + LOOKUP_TABLE[LookUpTableIndex]).gameObject);
+            }
         }
-    }
+        _isasd = true;
 
+    }
+    private int a = 10;
     private void ManhattanDistance(List<GameObject> tileList, int goalX, int goalY)
     {
-        
+        // 임시방편 와일문
+        while (a != 0)
+        {
             for (int i = 0; i < tileList.Count; ++i)
             {
                 int x = Mathf.RoundToInt(tileList[i].transform.position.x);
@@ -132,21 +145,26 @@ public class AStar : MonoBehaviour
                     }
                     else
                     {
-                        _minDistanse = _minDistanse < tileList[i].GetComponent<TileGHF>().F ? _minDistanse : tileList[i].GetComponent<TileGHF>().F; 
+                        _minDistanse = _minDistanse < tileList[i].GetComponent<TileGHF>().F ? _minDistanse : tileList[i].GetComponent<TileGHF>().F;
                         _index = _minDistanse < tileList[i].GetComponent<TileGHF>().F ? _index : Mathf.RoundToInt(tileList[i].transform.position.x + tileList[i].transform.position.y * json.YTileCount);
-                    }
-                    
+                    }  
                 }
             }
+
+            Debug.Log(_minDistanse);
 
             _closeTiles.Add(transform.GetChild(_index).gameObject);
 
             _openTiles.Clear();
 
             MaybeAStar(_openTiles, _index);
+            --a;
+        }
+    
+        for (int i = 0; i < _closeTiles.Count; ++i)
+        {
+            _closeTiles[i].GetComponent<SpriteRenderer>().color = Color.green;
 
-
-            
-        
+        }
     }
 }
